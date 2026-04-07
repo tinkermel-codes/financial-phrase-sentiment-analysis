@@ -1,2 +1,2 @@
 data:
-  raw_path = "../data/raw/Sentences_AllAgree.txt"
+  raw_path: "../data/raw/Sentences_AllAgree.txt"
