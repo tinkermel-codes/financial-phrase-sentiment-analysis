@@ -33,4 +33,8 @@ def top_ngrams_for_label(df, label, stop_words, ngram_size, top_n):
     else:
         items = get_ngrams(clean_tokens, ngram_size)
 
-    return pd.Series(items).value_counts().head(top_n)
+    counts = pd.Series(items).value_counts()
+    rel_freq = counts / counts.sum()
+
+    #return pd.Series(items).value_counts().head(top_n)
+    return rel_freq.head(top_n)
