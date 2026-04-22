@@ -1,22 +1,6 @@
 import pandas as pd
-from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.pipeline import Pipeline
-
-
-def clean_text(text, stop_words=None, lemmatizer=None):
-    text = text.lower()
-    tokens = word_tokenize(text)
-    tokens = [t for t in tokens if t.isalpha()]
-
-    if lemmatizer is not None:
-        tokens = [lemmatizer.lemmatize(t) for t in tokens]
-
-    if stop_words is not None:
-        tokens = [t for t in tokens if t not in stop_words]
-
-    return tokens
+from src.data.clean_data import clean_text
 
 
 def get_ngrams(tokens, n):
@@ -27,6 +11,7 @@ def top_words_for_label(df, label, stop_words, n, lemmatizer=None):
     texts = " ".join(df[df["label"] == label]["text"])
     clean_tokens = clean_text(texts, stop_words, lemmatizer)
     return pd.Series(clean_tokens).value_counts().head(n)
+
 
 def top_ngrams_for_label(df, label, stop_words, ngram_size, top_n, lemmatizer=None):
     texts = df.loc[df["label"] == label, "text"]
@@ -44,29 +29,3 @@ def top_ngrams_for_label(df, label, stop_words, ngram_size, top_n, lemmatizer=No
     rel_freq = counts / counts.sum()
 
     return rel_freq.head(top_n)
-
-def clean_text_for_tfidf(text, stop_words=None, lemmatizer=None):
-    text = text.lower()
-    tokens = word_tokenize(text)
-    tokens = [t for t in tokens if t.isalpha()]
-
-    if lemmatizer is not None:
-        tokens = [lemmatizer.lemmatize(t) for t in tokens]
-
-    if stop_words is not None:
-        tokens = [t for t in tokens if t not in stop_words]
-
-    return " ".join(tokens)
-
-
-def cleaning_transformer(stop_words=None, lemmatizer=None):
-    return FunctionTransformer(
-        lambda texts: [clean_text_for_tfidf(t, stop_words, lemmatizer) for t in texts],
-        validate=False
-    )
-
-
-def make_cleaning_pipeline(stop_words=None, lemmatizer=None):
-    return Pipeline([
-        ("clean", cleaning_transformer(stop_words, lemmatizer))
-    ])
