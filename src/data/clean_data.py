@@ -1,43 +1,27 @@
 from nltk.tokenize import word_tokenize
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.pipeline import Pipeline
-
-def clean_text(text, stop_words=None, lemmatizer=None):
-    text = text.lower()
-    tokens = word_tokenize(text)
-    tokens = [t for t in tokens if t.isalpha()]
-
-    if lemmatizer is not None:
-        tokens = [lemmatizer.lemmatize(t) for t in tokens]
-
-    if stop_words is not None:
-        tokens = [t for t in tokens if t not in stop_words]
-
-    return tokens
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
-def clean_text_for_tfidf(text, stop_words=None, lemmatizer=None):
-    text = text.lower()
-    tokens = word_tokenize(text)
-    tokens = [t for t in tokens if t.isalpha()]
+class CleaningTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, stop_words=None, lemmatizer=None):
+        self.stop_words = stop_words
+        self.lemmatizer = lemmatizer
 
-    if lemmatizer is not None:
-        tokens = [lemmatizer.lemmatize(t) for t in tokens]
+    def fit(self, X, y=None):
+        return self
 
-    if stop_words is not None:
-        tokens = [t for t in tokens if t not in stop_words]
+    def transform(self, X):
+        return X.apply(self.clean_text)
 
-    return " ".join(tokens)
+    def clean_text(self, text):
+        text = text.lower()
+        tokens = word_tokenize(text)
+        tokens = [t for t in tokens if t.isalpha()]
 
+        if self.lemmatizer is not None:
+            tokens = [self.lemmatizer.lemmatize(t) for t in tokens]
 
-def cleaning_transformer(stop_words=None, lemmatizer=None):
-    return FunctionTransformer(
-        lambda texts: [clean_text_for_tfidf(t, stop_words, lemmatizer) for t in texts],
-        validate=False
-    )
+        if self.stop_words is not None:
+            tokens = [t for t in tokens if t not in self.stop_words]
 
-
-def make_cleaning_pipeline(stop_words=None, lemmatizer=None):
-    return Pipeline([
-        ("clean", cleaning_transformer(stop_words, lemmatizer))
-    ])
+        return " ".join(tokens)
