@@ -4,7 +4,7 @@ import os
 import json
 import joblib
 import matplotlib.pyplot as plt
-
+import pandas as pd
 
 def load_config(path):
     current_file = Path(__file__).resolve()
@@ -34,3 +34,32 @@ def save_experiment(model_name, pipeline, metrics, config, feature_importance_fi
         feature_importance_fig.savefig(exp_dir / "feature_importance.png", dpi=150)
 
     print(f"Experiment saved to: {exp_dir}")
+
+
+def load_metrics():
+    root = Path(__file__).resolve().parents[2]
+    model_root = root / "models"
+
+    results = []
+
+    for model_dir in model_root.iterdir():
+        metrics_file = model_dir / "metrics.json"
+        config_file = model_dir / "config.yaml"
+
+        if metrics_file.exists():
+            with open(metrics_file, "r") as f:
+                metrics = json.load(f)
+            with open(config_file, "r") as f:
+                config = yaml.safe_load(f)
+
+        results.append({
+            "model": model_dir.name,
+            "accuracy": metrics["accuracy"],
+            "macro_f1": metrics["macro avg"]["f1-score"],
+            "weighted_f1": metrics["weighted avg"]["f1-score"],
+            "macro_precision": metrics["macro avg"]["precision"],
+            "macro_recall": metrics["macro avg"]["recall"],
+            "config": config
+            })
+
+    return pd.DataFrame(results)
