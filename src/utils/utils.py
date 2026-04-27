@@ -19,7 +19,7 @@ def save_experiment(model_name, pipeline, metrics, config, feature_importance_fi
     models_dir = root / "models"
 
     exp_name = model_name.lower().replace(" ", "_")
-    exp_dir = models_dir / f"experiment_{exp_name}"
+    exp_dir = models_dir / f"{exp_name}"
     exp_dir.mkdir(parents=True, exist_ok=True)
 
     joblib.dump(pipeline, exp_dir / "model.pkl")
