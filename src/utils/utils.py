@@ -53,13 +53,45 @@ def load_metrics():
                 config = yaml.safe_load(f)
 
         results.append({
-            "model": model_dir.name,
+            "model": config["model"],
             "accuracy": metrics["accuracy"],
             "macro_f1": metrics["macro avg"]["f1-score"],
             "weighted_f1": metrics["weighted avg"]["f1-score"],
             "macro_precision": metrics["macro avg"]["precision"],
             "macro_recall": metrics["macro avg"]["recall"],
             "config": config
+            })
+
+    return pd.DataFrame(results)
+
+
+def load_class_metrics():
+    root = Path(__file__).resolve().parents[2]
+    model_root = root / "models"
+
+    results = []
+
+    for model_dir in model_root.iterdir():
+        metrics_file = model_dir / "metrics.json"
+        config_file = model_dir / "config.yaml"
+
+        if metrics_file.exists():
+            with open(metrics_file, "r") as f:
+                metrics = json.load(f)
+            with open(config_file, "r") as f:
+                config = yaml.safe_load(f)
+
+        for cls, values in metrics.items():
+            if cls in ["accuracy", "macro avg", "weighted avg"]:
+                continue
+
+            results.append({
+                "model": config["model"],
+                "class": cls,
+                "precision": values["precision"],
+                "recall": values["recall"],
+                "f1": values["f1-score"],
+                "support": values["support"]
             })
 
     return pd.DataFrame(results)
