@@ -14,7 +14,7 @@ def load_config(path):
         return yaml.safe_load(f)
     
 
-def save_experiment(model_name, pipeline, metrics, config, feature_importance_fig=None):
+def save_experiment(model_name, pipeline, metrics, config, feature_importance_df=None):
     root = Path(__file__).resolve().parents[2]
     models_dir = root / "models"
 
@@ -30,8 +30,8 @@ def save_experiment(model_name, pipeline, metrics, config, feature_importance_fi
     with open(exp_dir / "config.yaml", "w") as f:
         yaml.dump(config, f)
 
-    if feature_importance_fig is not None:
-        feature_importance_fig.savefig(exp_dir / "feature_importance.png", dpi=150)
+    if feature_importance_df is not None:
+        feature_importance_df.to_csv(exp_dir / "feature_importance.csv")
 
     print(f"Experiment saved to: {exp_dir}")
 
