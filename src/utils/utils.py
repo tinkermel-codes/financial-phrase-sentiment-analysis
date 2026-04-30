@@ -95,3 +95,34 @@ def load_class_metrics():
             })
 
     return pd.DataFrame(results)
+
+
+def load_feature_importances():
+    root = Path(__file__).resolve().parents[2]
+    model_root = root / "models"
+
+    results = []
+
+    for model_dir in model_root.iterdir():
+        fi_file = model_dir / "feature_importance.csv"
+        config_file = model_dir / "config.yaml"
+
+        if fi_file.exists():
+            fi_df = pd.read_csv(fi_file)
+
+            if config_file.exists():
+                with open(config_file, "r") as f:
+                    config = yaml.safe_load(f)
+
+            for _, row in fi_df.iterrows():
+                results.append({
+                    "model": config["model"],
+                    "feature": row["feature"],
+                    "coefficient": row["coefficient"]
+                })
+
+    return pd.DataFrame(results)
+
+
+       
+
