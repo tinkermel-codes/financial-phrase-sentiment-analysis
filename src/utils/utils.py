@@ -1,10 +1,9 @@
 import yaml
 from pathlib import Path
-import os
 import json
 import joblib
-import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 
 def load_config(path):
     current_file = Path(__file__).resolve()
@@ -123,6 +122,10 @@ def load_feature_importances():
 
     return pd.DataFrame(results)
 
+
+def build_model_colors(models, palette):
+    palette = sns.color_palette(palette, n_colors=len(models))
+    return {model: palette[i] for i, model in enumerate(models)}
 
        
 
