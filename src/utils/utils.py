@@ -13,7 +13,7 @@ def load_config(path):
         return yaml.safe_load(f)
     
 
-def save_experiment(model_name, pipeline, metrics, config, feature_importance_df=None):
+def save_experiment(model_name, pipeline, metrics, config, feature_importance_df=None, confusion_matrix=None):
     root = Path(__file__).resolve().parents[2]
     models_dir = root / "models"
 
@@ -31,6 +31,9 @@ def save_experiment(model_name, pipeline, metrics, config, feature_importance_df
 
     if feature_importance_df is not None:
         feature_importance_df.to_csv(exp_dir / "feature_importance.csv")
+
+    if confusion_matrix is not None:
+        confusion_matrix.to_csv(exp_dir / "confusion_matrix.csv")
 
     print(f"Experiment saved to: {exp_dir}")
 
@@ -126,6 +129,3 @@ def load_feature_importances():
 def build_model_colors(models, palette):
     palette = sns.color_palette(palette, n_colors=len(models))
     return {model: palette[i] for i, model in enumerate(models)}
-
-       
-
