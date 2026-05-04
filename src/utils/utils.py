@@ -4,6 +4,9 @@ import json
 import joblib
 import pandas as pd
 import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+import math
 
 def load_config(path):
     current_file = Path(__file__).resolve()
@@ -129,3 +132,103 @@ def load_feature_importances():
 def build_model_colors(models, palette):
     palette = sns.color_palette(palette, n_colors=len(models))
     return {model: palette[i] for i, model in enumerate(models)}
+
+
+def plot_radar_chart(df, metric_cols, figsize, model_colors, title):
+
+    n_metrics = len(metric_cols)
+
+    angles = [n / float(n_metrics) * 2 * np.pi for n in range(n_metrics)]
+    angles += angles[:1]
+
+    plt.figure(figsize=figsize)
+
+    for _, row in df.iterrows():
+        values = row[metric_cols].tolist()
+        values += values[:1]
+
+        plt.polar(
+            angles,
+            values,
+            color=model_colors[row["model"]],
+            linewidth=2,
+            label=row["model"]
+        )
+
+    ax = plt.gca()
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels([])
+
+    pretty_labels = [col.replace("macro_", "").replace("_", " ").title() for col in metric_cols]
+
+    for angle, label in zip(angles[:-1], pretty_labels):
+        angle_deg = np.degrees(angle)
+        r_max = ax.get_ylim()[1]
+
+        ha = "left" if -90 <= angle_deg <= 90 else "right"
+        va = "bottom" if 0 < angle_deg < 180 else "top"
+
+        ax.text(angle, r_max * 1.05, label, ha=ha, va=va)
+
+    plt.legend(loc='lower right', bbox_to_anchor=(1.2, -0.05))
+    plt.suptitle(title)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_confusion_matrices(cmap):
+    root = Path(__file__).resolve().parents[2]
+    model_root = root / "models"
+
+    model_dirs = []
+    titles = []
+
+    for d in model_root.iterdir():
+        cm_file = d / "confusion_matrix.csv"
+        config_file = d / "config.yaml"
+
+        if d.is_dir() and cm_file.exists() and config_file.exists():
+            model_dirs.append(d)
+
+            with open(config_file, "r") as f:
+                config = yaml.safe_load(f)
+
+            titles.append(config["model"])
+
+    n = len(model_dirs)
+
+    cols = min(3, n)
+    rows = math.ceil(n / cols)
+
+    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
+
+    if rows == 1 and cols == 1:
+        axes = [[axes]]
+    elif rows == 1:
+        axes = [axes]
+    elif cols == 1:
+        axes = [[ax] for ax in axes]
+
+    idx = 0
+    for r in range(rows):
+        for c in range(cols):
+            ax = axes[r][c]
+
+            if idx < n:
+                model_dir = model_dirs[idx]
+                title = titles[idx]
+
+                df_cm = pd.read_csv(model_dir / "confusion_matrix.csv", index_col=0)
+
+                sns.heatmap(df_cm, annot=True, cmap=cmap, ax=ax, vmin=0, vmax=1)
+                ax.set_title(title)
+                ax.set_xlabel("Predicted")
+                ax.set_ylabel("True")
+            else:
+                ax.axis("off")
+
+            idx += 1
+
+    plt.suptitle("Confusion Matrices")
+    plt.tight_layout()
+    plt.show()
