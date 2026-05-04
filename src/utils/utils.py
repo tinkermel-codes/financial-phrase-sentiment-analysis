@@ -262,3 +262,58 @@ def plot_confusion_matrices(cmap):
     plt.suptitle("Confusion Matrices")
     plt.tight_layout()
     plt.show()
+
+
+def plot_all_learning_curves():
+    root = Path(__file__).resolve().parents[2]
+    model_root = root / "models"
+
+    model_dirs = []
+    titles = []
+
+    for d in model_root.iterdir():
+        lc_file = d / "learning_curve.csv"
+        config_file = d / "config.yaml"
+
+        if d.is_dir() and lc_file.exists() and config_file.exists():
+            model_dirs.append(d)
+
+            with open(config_file, "r") as f:
+                config = yaml.safe_load(f)
+
+            titles.append(config["model"])
+
+    n = len(model_dirs)
+
+    cols = min(3, n)
+    rows = math.ceil(n / cols)
+
+    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
+    if rows * cols == 1:
+        axes = [axes]
+    else:
+        axes = axes.flatten()
+
+    for ax, model_dir in zip(axes, model_dirs):
+        lc_file = model_dir / "learning_curve.csv"
+        config_file = model_dir / "config.yaml"
+
+        with open(config_file, "r") as f:
+            config = yaml.safe_load(f)
+        model_name = config.get("model", model_dir.name)
+
+        df = pd.read_csv(lc_file)
+
+        ax.plot(df["train_size"], df["train_score_mean"], label="Train")
+        ax.plot(df["train_size"], df["val_score_mean"], linestyle="--", label="Val")
+
+        ax.set_title(model_name)
+        ax.set_xlabel("Training Samples")
+        ax.set_ylabel("Macro F1 Score")
+        ax.legend(loc= "lower right")
+
+    for ax in axes[n:]:
+        ax.axis("off")
+
+    plt.tight_layout()
+    plt.show()
