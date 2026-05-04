@@ -7,6 +7,7 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from sklearn.model_selection import learning_curve
 
 def load_config(path):
     current_file = Path(__file__).resolve()
@@ -16,7 +17,17 @@ def load_config(path):
         return yaml.safe_load(f)
     
 
-def save_experiment(model_name, pipeline, metrics, config, feature_importance_df=None, confusion_matrix=None):
+def save_experiment(model_name,
+                    pipeline,
+                    metrics,
+                    config,
+                    X,
+                    y,
+                    scoring="f1_macro",
+                    cv=5,
+                    feature_importance_df=None,
+                    confusion_matrix=None
+                    ):
     root = Path(__file__).resolve().parents[2]
     models_dir = root / "models"
 
@@ -37,6 +48,25 @@ def save_experiment(model_name, pipeline, metrics, config, feature_importance_df
 
     if confusion_matrix is not None:
         confusion_matrix.to_csv(exp_dir / "confusion_matrix.csv")
+
+    train_sizes, train_scores, val_scores = learning_curve(
+        pipeline,
+        X,
+        y,
+        cv=cv,
+        train_sizes=[0.2, 0.4, 0.6, 0.8, 1.0],
+        scoring=scoring
+        )
+    
+    lc_df = pd.DataFrame({
+        "train_size": train_sizes,
+        "train_score_mean": train_scores.mean(axis=1),
+        "train_score_std": train_scores.std(axis=1),
+        "val_score_mean": val_scores.mean(axis=1),
+        "val_score_std": val_scores.std(axis=1)
+    })
+
+    lc_df.to_csv(exp_dir / "learning_curve.csv", index=False)
 
     print(f"Experiment saved to: {exp_dir}")
 
