@@ -226,6 +226,24 @@ def plot_radar_chart(df, metric_cols, figsize, model_colors, title):
     plt.show()
 
 
+def plot_class_performances(df, colors, figsize=(12,6)):
+    df_melted = df.melt(
+        id_vars=["model", "class"],
+        value_vars=["precision", "recall", "f1"],
+        var_name="metric",
+        value_name="score"
+        )
+
+    plt.figure(figsize=figsize)
+    sns.barplot(data=df_melted, x="class", y="score", hue="model", palette=colors)
+    plt.title("Class-Level Performance per Model")
+    plt.xlabel("Class")
+    plt.ylabel("Score")
+    plt.ylim(0,1.1)
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_confusion_matrices(cmap):
     root = Path(__file__).resolve().parents[2]
     model_root = root / "models"
