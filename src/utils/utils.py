@@ -164,6 +164,26 @@ def build_model_colors(models, palette):
     return {model: palette[i] for i, model in enumerate(models)}
 
 
+def plot_macro_metrics(df, colors, figsize=(10,6)):
+    df_melted = df.melt(
+        id_vars="model",
+        value_vars=["macro_precision", "macro_recall", "macro_f1"],
+        var_name="metric",
+        value_name="score"
+        )
+
+    df_melted["metric"] = (df_melted["metric"].str.replace("_", " ").str.title())
+
+    plt.figure(figsize=figsize)
+    sns.barplot(data=df_melted, x="model", y="score", hue="metric", palette=colors)
+    plt.title("Macro Metrics per Model")
+    plt.xlabel("Model")
+    plt.ylabel("Score")
+    plt.ylim(0,1)
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_radar_chart(df, metric_cols, figsize, model_colors, title):
 
     n_metrics = len(metric_cols)
