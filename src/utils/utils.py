@@ -508,3 +508,62 @@ def get_model_sizes():
             rows.append({"model": config["model"], "model_size_kb": model_size / 1024})
     
     return pd.DataFrame(rows)
+
+
+def plot_model_sizes_and_efficiencies(metrics_df, sizes_df, metric, colors, figsize=(14,5)):
+    df = metrics_df.merge(sizes_df, on="model")
+    df["efficiency"] = df[metric] / df["model_size_kb"]
+
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    
+    sns.scatterplot(
+        data=df,
+        x="model_size_kb",
+        y=metric,
+        hue="model",
+        palette=colors,
+        ax=axes[0]
+        )
+    
+    axes[0].set_title("Model Size vs Performance")
+    axes[0].set_xlabel("Model Size (KB)")
+    axes[0].set_ylabel(metric)
+
+    sns.barplot(
+        data=df,
+        x="model",
+        y="efficiency",
+        hue="model",
+        palette=colors,
+        ax=axes[1]
+    )
+    axes[1].set_title("Model Efficiency: Performance per KB")
+    axes[1].set_ylabel(f"Efficiency ({metric} / KB)")
+    axes[1].set_xlabel("Model")
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+
+# def plot_abc(metrics_df, sizes_df, metric, figsize=(14, 5)):
+#    df = metrics_df.merge(sizes_df, on="model")
+#    df["efficiency"] = df[metric] / df["model_size_kb"]
+   
+#    fig, axes = plt.subplots(1, 2, figsize=figsize)
+#    axes[0].scatter(df["model_size_kb"], df[metric], s=120)
+   
+#    for _, row in df.iterrows():
+#         axes[0].annotate(row["model"], (row["model_size_kb"], row[metric]), textcoords="offset points", xytext=(5,5))
+        
+#     axes[0].set_title("Model Size vs Performance")
+#     axes[0].set_xlabel("Model Size (KB)")
+#    axes[0].set_ylabel(metric)
+
+#     axes[1].bar(df["model"], df["efficiency"])
+#     axes[1].set_title("Model Efficiency: Performance per KB")
+#     axes[1].set_ylabel("Efficiency (F1 / KB)")
+#     axes[1].set_xlabel("Model")
+   
