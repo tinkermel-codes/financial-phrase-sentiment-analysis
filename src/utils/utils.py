@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from sklearn.model_selection import learning_curve
+import os
 
 def load_config(path):
     current_file = Path(__file__).resolve()
@@ -448,6 +449,52 @@ def plot_misclassifications(mis_dict, normalize=True, same_scale=True, cmap="Red
     plt.tight_layout()
     plt.show()
 
+
+def plot_error_rates(mis_dict, colors, figsize=(8,5)):
+    root = Path(__file__).resolve().parents[2]
+
+    config = load_config(root / "configs/config.yaml")
+
+    data_path = config["data"]["preprocessed_path"]
+    label_col = config["data"]["label_column"]
+
+    df = pd.read_csv(data_path, keep_default_na=False)
+    class_counts = df[label_col].value_counts()
+
+    rows = []
+
+    for model_name, mis_df in mis_dict.items():
+        error_counts = mis_df["true"].value_counts()
+        error_rate = (error_counts / class_counts).fillna(0)
+
+        for cls, rate in error_rate.items():
+            rows.append({"model": model_name, "class":cls, "error_rate": rate})
+
+    errors_df = pd.DataFrame(rows)
+
+    plt.figure(figsize=figsize)
+    sns.barplot(
+        data=errors_df,
+        x="class",
+        y="error_rate",
+        hue="model",
+        palette=colors
+    )
+
+    plt.title("Class-wise Error Rates per Model")
+    plt.xlabel("Class")
+    plt.ylabel("Error Rate")
+    plt.ylim(0, 1.1)
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+
+
+
+           
 
 
 
