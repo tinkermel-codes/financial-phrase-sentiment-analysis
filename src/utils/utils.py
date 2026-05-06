@@ -396,5 +396,59 @@ def get_misclassifications():
     return misclassifications
 
 
+def plot_misclassifications(mis_dict, normalize=True, same_scale=True, cmap="Reds"):
+    models = list(mis_dict.keys())
+
+    n = len(models)
+    cols = min(3, n)
+    rows = math.ceil(n / cols)
+
+    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
+
+    if rows * cols == 1:
+        axes = [axes]
+    else:
+        axes = axes.flatten()
+
+    if same_scale:
+        if normalize:
+            vmin, vmax = 0, 1
+        else:
+            vmin = 0
+            vmax = max(pd.crosstab(df["true"], df["pred"]).values.max() for df in mis_dict.values())
+    else:
+        vmin = vmax = None
+
+    for ax, model in zip(axes, models):
+        
+        if normalize:
+            error_matrix = pd.crosstab(mis_dict[model]["true"], mis_dict[model]["pred"], normalize="index")
+
+        else:
+            error_matrix = pd.crosstab(mis_dict[model]["true"], mis_dict[model]["pred"])
+
+        sns.heatmap(
+            error_matrix,
+            annot=True,
+            cmap=cmap,
+            ax=ax,
+            vmin=vmin,
+            vmax=vmax,
+            fmt="d" if not normalize else ".2f"
+            )
+        
+        ax.set_title(model)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("True")
+
+    for ax in axes[n:]:
+        ax.axis("off")
+
+    plt.suptitle("Misclassification Heatmaps")
+    plt.tight_layout()
+    plt.show()
+
+
+
 
 
