@@ -489,13 +489,22 @@ def plot_error_rates(mis_dict, colors, figsize=(8,5)):
     plt.show()
 
 
+def get_model_sizes():
+    root = Path(__file__).resolve().parents[2]
+    model_root = root / "models"
 
+    rows = []
 
+    for d in model_root.iterdir():
+        model_file = d / "model.pkl"
+        config_file = d / "config.yaml"
 
+        if d.is_dir() and model_file.exists() and config_file.exists():
+            model_size = os.path.getsize(model_file)
 
+            with open(config_file, "r") as f:
+                config = yaml.safe_load(f)
 
-           
-
-
-
-
+            rows.append({"model": config["model"], "model_size_kb": model_size / 1024})
+    
+    return pd.DataFrame(rows)
