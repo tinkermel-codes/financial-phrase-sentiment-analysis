@@ -355,3 +355,46 @@ def plot_all_learning_curves():
 
     plt.tight_layout()
     plt.show()
+
+
+def get_misclassifications():
+    root = Path(__file__).resolve().parents[2]
+    model_root = root / "models"
+
+    config = load_config(root / "configs/config.yaml")
+
+    data_path = config["data"]["preprocessed_path"]
+    text_col = config["data"]["text_column"]
+    label_col = config["data"]["label_column"]
+
+    df = pd.read_csv(data_path, keep_default_na=False)
+    X = df[text_col]
+    y = df[label_col]
+
+    misclassifications = {}
+
+    for d in model_root.iterdir():
+        model_file = d / "model.pkl"
+        config_file = d / "config.yaml"
+
+        if d.is_dir() and model_file.exists() and config_file.exists():
+
+            model = joblib.load(model_file)
+            y_pred = model.predict(X)
+
+            df_mis = pd.DataFrame({
+            "text": X,
+            "true": y,
+            "pred": y_pred
+            })
+            df_mis = df_mis[df_mis["true"] != df_mis["pred"]]
+
+            with open(config_file, "r") as f:
+                config = yaml.safe_load(f)
+
+            misclassifications[config["model"]] = df_mis
+    return misclassifications
+
+
+
+
