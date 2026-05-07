@@ -236,10 +236,10 @@ def plot_class_performances(df, colors, figsize=(12,6)):
         )
 
     plt.figure(figsize=figsize)
-    sns.barplot(data=df_melted, x="class", y="score", hue="model", palette=colors)
+    sns.barplot(data=df_melted[df_melted["metric"] == "f1"], x="class", y="score", hue="model", palette=colors)
     plt.title("Class-Level Performance per Model")
     plt.xlabel("Class")
-    plt.ylabel("Score")
+    plt.ylabel("F1 Score")
     plt.ylim(0,1.1)
     plt.tight_layout()
     plt.show()
@@ -350,6 +350,7 @@ def plot_all_learning_curves():
         ax.set_xlabel("Training Samples")
         ax.set_ylabel("Macro F1 Score")
         ax.legend(loc= "lower right")
+        ax.set_ylim(0,1)
 
     for ax in axes[n:]:
         ax.axis("off")
@@ -543,27 +544,4 @@ def plot_model_sizes_and_efficiencies(metrics_df, sizes_df, metric, colors, figs
 
     plt.tight_layout()
     plt.show()
-
-
-
-
-
-# def plot_abc(metrics_df, sizes_df, metric, figsize=(14, 5)):
-#    df = metrics_df.merge(sizes_df, on="model")
-#    df["efficiency"] = df[metric] / df["model_size_kb"]
-   
-#    fig, axes = plt.subplots(1, 2, figsize=figsize)
-#    axes[0].scatter(df["model_size_kb"], df[metric], s=120)
-   
-#    for _, row in df.iterrows():
-#         axes[0].annotate(row["model"], (row["model_size_kb"], row[metric]), textcoords="offset points", xytext=(5,5))
-        
-#     axes[0].set_title("Model Size vs Performance")
-#     axes[0].set_xlabel("Model Size (KB)")
-#    axes[0].set_ylabel(metric)
-
-#     axes[1].bar(df["model"], df["efficiency"])
-#     axes[1].set_title("Model Efficiency: Performance per KB")
-#     axes[1].set_ylabel("Efficiency (F1 / KB)")
-#     axes[1].set_xlabel("Model")
    
