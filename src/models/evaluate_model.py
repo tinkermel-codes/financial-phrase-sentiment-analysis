@@ -38,3 +38,13 @@ def compute_learning_curve(
         "val_score_mean": val_scores.mean(axis=1),
         "val_score_std": val_scores.std(axis=1)
     })
+
+
+def compute_misclassifications(pipeline, X, y):
+    y_pred = pipeline.predict(X)
+    df_mis = pd.DataFrame({
+            "text": X,
+            "true": y,
+            "pred": y_pred
+            })
+    return df_mis[df_mis["true"] != df_mis["pred"]]

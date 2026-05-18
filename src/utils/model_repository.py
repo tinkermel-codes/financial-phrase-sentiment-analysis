@@ -42,7 +42,8 @@ class ModelRepository:
                         config,
                         feature_importance_df=None,
                         confusion_matrix=None,
-                        learning_curve_df=None
+                        learning_curve_df=None,
+                        misclassiifactions_df=None
                         ):
         exp_dir = self.get_experiment_dir(model_name)
 
@@ -58,6 +59,9 @@ class ModelRepository:
 
         if learning_curve_df is not None:
             self.save_dataframe(exp_dir / "learning_curve.csv", learning_curve_df, index=False)
+
+        if misclassiifactions_df is not None:
+            self.save_dataframe(exp_dir / "misclassifications.csv", misclassiifactions_df, index=False)
 
         print(f"Experiment saved to: {exp_dir}")
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 import yaml
 import pandas as pd
+import os
 
 
 def load_config(path):
@@ -71,4 +72,51 @@ def load_feature_importances(repo):
                 "coefficient": row["coefficient"]
                 })
 
+    return pd.DataFrame(results)
+
+
+def load_confusion_data(repo):
+    results = []
+
+    for model_dir, config in repo.iter_models():
+        cm_df = repo.load_csv(model_dir, "confusion_matrix.csv")
+        cm_df = cm_df.set_index("Unnamed: 0")
+        
+        if cm_df is not None:
+            results.append((config["model"], cm_df))
+    
+    return results
+
+
+def load_learning_curves(repo):
+    results = []
+
+    for model_dir, config in repo.iter_models():
+        lc_df = repo.load_csv(model_dir, "learning_curve.csv")
+
+        if lc_df is not None:
+            results.append((config["model"], lc_df))
+
+    return results
+
+
+def load_misclassifications(repo):
+    results = []
+
+    for model_dir, config in repo.iter_models():
+        mscls_df = repo.load_csv(model_dir, "misclassifications.csv")
+
+        if mscls_df is not None:
+            results.append((config["model"], mscls_df))
+
+    return results
+
+def load_model_sizes(repo):
+    results = []
+
+    for model_dir, config in repo.iter_models():
+        model_size = os.path.getsize(model_dir / "model.pkl")
+
+        if model_size is not None:
+            results.append({"model": config["model"], "model_size_kb": model_size / 1024})
     return pd.DataFrame(results)
