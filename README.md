@@ -5,8 +5,13 @@ A machine learning project for classifying financial news phrases into positive,
 ## Project Overview
 This project analyzes financial text snippets and evaluates multiple machine learning models on the Financial PhraseBank dataset. The goal is to compare models by the following metrics:
 - Accuracy
+- Macro Metrics (Precision, Recall, F1)
+- F1-Scores on Class-Level
 - Confusion matrices
 - Misclassification patterns
+- Class-wise Error Rates
+- Learning Curves
+- Feature Importances for Linear Models
 - Model size
 - Efficiency (performance per kilobyte)
 
@@ -18,6 +23,41 @@ This repository demonstrates end-to-end ML engineering skills:
 - Result Visualization
 
 
+## Business Motivation
+Financial markets react instantly to news, reports and public sentiment. Analysts, traders and automated systems rely in fast, accurate interpretation of textual information to assess risk and identify opportunities. Manual sentiment evaluation is slow, inconsistent and impossible to scale across thousands of daily financial statements. 
+
+This project addresses the gap by building models that can automatically classifiy financial phrases into positive, negative or neutral sentiment. Such systems support:
+- Faster decision-making in trading and portfolio management
+- Risk detection through early identification of negative sentiment
+- Market monitoring at scale across news streams and reports
+
+
+## Engineering Decisions
+This project evaluates three classic machine learning models for financial sentiment classification: Logistic Regression, Linear SVM, and Naive Bayes. The design choices focus on interpretability, reproducibility, and fair comparison.
+
+### Model Selection
+The selected models are Logistic Regression, Linear SVM and Naive Bayes because they are strong baselines for TF-IDF-based text classification. Each model represents a different approach:
+- Logistic Regression: probabilistic linear classifier
+- Linear SVM: margin-maxing linear separator
+- Naive Bayes: generative model with strong independece assumptions
+
+### Preprocessing Strategy
+A minimal preprocessing pipeline was used to preserve financial terminology:
+- Lowercasing
+- Tokenization
+- Stopword removal
+- TF-IDF vectorization
+
+This ensures that differences in performance come from the models, not from heavy text normalization.
+
+### Training and Experiment Setup
+All models share the same:
+- Train/Test split
+- Preprocessing pipeline
+- Random seed
+This ensures a fair comparison.
+
+
 ## Dataset
 This project uses the Financial PhraseBank dataset from Hugging Face:
 **Dataset:** https://huggingface.co/datasets/takala/financial_phrasebank
@@ -27,30 +67,30 @@ The dataset contains short financial news phrases labeled by human annotators wi
 The dataset it available in four possible configurations depending on the percentage of agreement of annotators. For this project, the dataset with an agreement rate of 100% between the annotators is used. It consists of 2264 samples. 
 
 
-## Models
-The following classical machine learning models were trained and evaluated:
-- Logistic Regression
-- Linear Support Vectore Machine (SVM)
-- Naive Bayes
-
-Each model is evaluated using:
-- Accuracy
-- Macro-F1
-- Confusion Matrix
-- Misclassification analysis
-- Model size (KB)
-- Efficiency metric: Macro-F1 / Model size (KB)
-
-
 ## Results & Visualizations
+### Accuracy
+Measures the overall proportion of correctly predicted sentiment labels across the dataset.
+
+### Macro Metrics
+Treat all sentiment classes equally and reveal how well the model performs under class imbalance.
+
+### Class-Level F1 Scores
+Show the balance between Precision and Recall for each sentiment class individually
+
 ### Confusion Matrices
 Show how well each model distinguisches between positive, neutral and negative sentiment.
 
-### Learning Curves
-Reveal underfitting/overfitting behavior and data efficiency.
-
 ### Misclassifications
 Highlight difficult sentiments and model weaknesses.
+
+### Class-wise Error Rates
+Indicate how often each sentiment class is predicted incorrectly.
+
+### Learning Curves
+Reveal underfitting or overfitting behavior and data efficiency.
+
+### Feature Importances (Logistic Regression, Linear SVM)
+Identify which n-grams most strongly influence sentiment predictions in linear models.
 
 ### Model Size & Efficiency
 Compare performance relative to model size.
@@ -122,7 +162,7 @@ financial-phrase-sentiment-analysis/
 │
 ├── requirements.txt
 ├── README.md
-├── LICENSE
+├── LICENSE.txt
 └── .gitignore
 ```
 
